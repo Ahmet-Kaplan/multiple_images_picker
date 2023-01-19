@@ -70,6 +70,8 @@ public class SwiftMultipleImagesPickerPlugin: NSObject, FlutterPlugin {
             let arguments = call.arguments as! Dictionary<String, AnyObject>
             let maxImages = arguments["maxImages"] as! Int
             let enableCamera = arguments["enableCamera"] as! Bool
+            let imageLimitedAlertMessage = arguments["imageLimitedAlertMessage"] as! String
+            let imageLimitedAlertButtonTitle = arguments["imageLimitedAlertButtonTitle"] as! String
             let options = arguments["iosOptions"] as! Dictionary<String, String>
             let selectedAssets = arguments["selectedAssets"] as! Array<String>
             var totalImagesSelected = 0
@@ -81,16 +83,7 @@ public class SwiftMultipleImagesPickerPlugin: NSObject, FlutterPlugin {
             }
             
             if selectedAssets.count > 0 {
-
-                let options = PHFetchOptions()
-                 if #available(iOS 9.1, *) {
-                    let imagesPredicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
-                    let liveImagesPredicate = NSPredicate(format: "(mediaSubtype & %d) != 0", PHAssetMediaSubtype.photoLive.rawValue)
-                    let compound = NSCompoundPredicate(orPredicateWithSubpredicates: [imagesPredicate, liveImagesPredicate])
-                    options.predicate = compound
-                }
-
-                let assets: PHFetchResult = PHAsset.fetchAssets(withLocalIdentifiers: selectedAssets, options: options)
+                let assets: PHFetchResult = PHAsset.fetchAssets(withLocalIdentifiers: selectedAssets, options: nil)
                 
                 vc.defaultSelections = assets
             }
@@ -138,16 +131,13 @@ public class SwiftMultipleImagesPickerPlugin: NSObject, FlutterPlugin {
             }
 
             UIViewController.topViewController()?.bs_presentImagePickerController(vc, animated: true,
-                select: { [weak vc](asset: PHAsset) -> Void in
+                select: {(asset: PHAsset) -> Void in
                     totalImagesSelected += 1
                     
 
                     if let autoCloseOnSelectionLimit = options["autoCloseOnSelectionLimit"] {
                         if (!autoCloseOnSelectionLimit.isEmpty && autoCloseOnSelectionLimit == "true") {
                             if (maxImages == totalImagesSelected) {
-                                guard let wVC = vc else {
-                                    return
-                                }
                                 UIApplication.shared.sendAction(wVC.doneButton.action!, to: wVC.doneButton.target, from: self, for: nil)
                             }
                         }
@@ -167,7 +157,15 @@ public class SwiftMultipleImagesPickerPlugin: NSObject, FlutterPlugin {
                         ]);
                     }
                     result(results);
-                }, completion: nil)
+                }, completion: nil,
+                selectLimitReached: { (_) in
+                    if imageLimitedAlertMessage.count > 0 && imageLimitedAlertButtonTitle.count > 0 {
+                        let alertController = UIAlertController(title: nil, message: imageLimitedAlertMessage, preferredStyle: .alert)
+                         let alertAction = UIAlertAction(title: imageLimitedAlertButtonTitle, style: .default, handler: nil)
+                        alertController.addAction(alertAction)
+                        UIViewController.topViewController()?.present(alertController, animated: true, completion: nil)
+                    }
+                })
             break;
         case "requestThumbnail":
             let arguments = call.arguments as! Dictionary<String, AnyObject>

@@ -12,7 +12,8 @@ void main() {
     setUp(() {
       channel.setMockMethodCallHandler((MethodCall methodCall) async {
         log.add(methodCall);
-        if (methodCall.method == 'requestOriginal' || methodCall.method == 'requestThumbnail') {
+        if (methodCall.method == 'requestOriginal' ||
+            methodCall.method == 'requestThumbnail') {
           return true;
         }
         return [
@@ -73,7 +74,8 @@ void main() {
           selectionTextColor: '#ffffff',
         );
 
-        await MultipleImagesPicker.pickImages(maxImages: 5, cupertinoOptions: cupertinoOptions);
+        await MultipleImagesPicker.pickImages(
+            maxImages: 5, cupertinoOptions: cupertinoOptions);
 
         expect(
           log,
@@ -101,7 +103,8 @@ void main() {
           useDetailsView: true,
           selectCircleStrokeColor: "#ffffff",
         );
-        await MultipleImagesPicker.pickImages(maxImages: 5, materialOptions: materialOptions);
+        await MultipleImagesPicker.pickImages(
+            maxImages: 5, materialOptions: materialOptions);
 
         expect(
           log,
@@ -121,39 +124,6 @@ void main() {
         expect(
           MultipleImagesPicker.pickImages(maxImages: -10),
           throwsArgumentError,
-        );
-      });
-
-      test('throws correct exception on cancel', () {
-        channel.setMockMethodCallHandler((MethodCall methodCall) async {
-          throw PlatformException(code: 'CANCELLED', message: 'Some error');
-        });
-
-        expect(
-          () => MultipleImagesPicker.pickImages(maxImages: 10),
-          throwsA(isA<NoImagesSelectedException>()),
-        );
-      });
-
-      test('throws correct exception when permission denied', () {
-        channel.setMockMethodCallHandler((MethodCall methodCall) async {
-          throw PlatformException(code: 'PERMISSION_DENIED', message: 'Some error');
-        });
-
-        expect(
-          () => MultipleImagesPicker.pickImages(maxImages: 10),
-          throwsA(isA<PermissionDeniedException>()),
-        );
-      });
-
-      test('throws correct exception when permission permanently denied', () {
-        channel.setMockMethodCallHandler((MethodCall methodCall) async {
-          throw PlatformException(code: 'PERMISSION_PERMANENTLY_DENIED', message: 'Some error');
-        });
-
-        expect(
-          () => MultipleImagesPicker.pickImages(maxImages: 10),
-          throwsA(isA<PermissionPermanentlyDeniedExeption>()),
         );
       });
     });

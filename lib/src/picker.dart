@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:multiple_images_picker/multiple_images_picker.dart';
 
 class MultipleImagesPicker {
-  static const MethodChannel _channel = const MethodChannel('multiple_images_picker');
+  static const MethodChannel _channel =
+      const MethodChannel('multiple_images_picker');
 
   /// Invokes the multiple image picker selector.
   ///
@@ -33,6 +34,8 @@ class MultipleImagesPicker {
   static Future<List<Asset>> pickImages({
     required int maxImages,
     bool enableCamera = false,
+    String imageLimitedAlertMessage = "",
+    String imageLimitedAlertButtonTitle = "",
     List<Asset> selectedAssets = const [],
     CupertinoOptions cupertinoOptions = const CupertinoOptions(),
     MaterialOptions materialOptions = const MaterialOptions(),
@@ -45,6 +48,8 @@ class MultipleImagesPicker {
       final List<dynamic> images = await _channel.invokeMethod(
         'pickImages',
         <String, dynamic>{
+          'imageLimitedAlertMessage': imageLimitedAlertMessage,
+          'imageLimitedAlertButtonTitle': imageLimitedAlertButtonTitle,
           'maxImages': maxImages,
           'enableCamera': enableCamera,
           'iosOptions': cupertinoOptions.toJson(),
@@ -72,10 +77,6 @@ class MultipleImagesPicker {
       switch (e.code) {
         case "CANCELLED":
           throw NoImagesSelectedException(e.message!);
-        case "PERMISSION_DENIED":
-          throw PermissionDeniedException(e.message!);
-        case "PERMISSION_PERMANENTLY_DENIED":
-          throw PermissionPermanentlyDeniedExeption(e.message!);
         default:
           throw e;
       }
@@ -90,7 +91,8 @@ class MultipleImagesPicker {
   /// refer to [Asset] class docs.
   ///
   /// The actual image data is sent via BinaryChannel.
-  static Future<bool?> requestThumbnail(String? identifier, int width, int height, int quality) async {
+  static Future<bool?> requestThumbnail(
+      String? identifier, int width, int height, int quality) async {
     if (width < 0) {
       throw new ArgumentError.value(width, 'width cannot be negative');
     }
@@ -100,11 +102,18 @@ class MultipleImagesPicker {
     }
 
     if (quality < 0 || quality > 100) {
-      throw new ArgumentError.value(quality, 'quality should be in range 0-100');
+      throw new ArgumentError.value(
+          quality, 'quality should be in range 0-100');
     }
 
     try {
-      bool? ret = await _channel.invokeMethod("requestThumbnail", <String, dynamic>{"identifier": identifier, "width": width, "height": height, "quality": quality});
+      bool? ret = await _channel.invokeMethod(
+          "requestThumbnail", <String, dynamic>{
+        "identifier": identifier,
+        "width": width,
+        "height": height,
+        "quality": quality
+      });
       return ret;
     } on PlatformException catch (e) {
       switch (e.code) {
@@ -130,7 +139,8 @@ class MultipleImagesPicker {
   /// The actual image data is sent via BinaryChannel.
   static Future<bool?> requestOriginal(String? identifier, quality) async {
     try {
-      bool? ret = await _channel.invokeMethod("requestOriginal", <String, dynamic>{
+      bool? ret =
+          await _channel.invokeMethod("requestOriginal", <String, dynamic>{
         "identifier": identifier,
         "quality": quality,
       });
@@ -148,7 +158,9 @@ class MultipleImagesPicker {
   // Requests image metadata for a given [identifier]
   static Future<Metadata> requestMetadata(String? identifier) async {
     try {
-      dynamic value = await _channel.invokeMethod<FutureOr<Map<dynamic, dynamic>>>("requestMetadata", <String, dynamic>{"identifier": identifier});
+      dynamic value = await _channel
+          .invokeMethod<FutureOr<Map<dynamic, dynamic>>>(
+              "requestMetadata", <String, dynamic>{"identifier": identifier});
       assert(value != null);
 
       Map<dynamic, dynamic> map = Map<dynamic, dynamic>.from(value);

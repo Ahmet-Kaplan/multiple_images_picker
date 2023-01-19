@@ -244,9 +244,9 @@ public class MultipleImagesPickerPlugin implements
 
         @Override
         protected void onPostExecute(ByteBuffer buffer) {
-            super.onPostExecute(buffer);     
+            super.onPostExecute(buffer); 
+            this.messenger.send("multiple_images_picker/image/" + this.identifier + ".original", buffer); 
             if(buffer != null) {
-                this.messenger.send("multiple_images_picker/image/" + this.identifier + ".original", buffer);
                 buffer.clear();
             }
         }
@@ -619,9 +619,7 @@ public class MultipleImagesPickerPlugin implements
             List<HashMap<String, Object>> result = new ArrayList<>(photos.size());
             for (Uri uri : photos) {
                 if(uri == null){
-                    clearMethodCallAndResult();
-                    return false;
-                  //  continue;
+                    continue;
                 }
                 HashMap<String, Object> map = new HashMap<>();
                 map.put("identifier", uri.toString());
