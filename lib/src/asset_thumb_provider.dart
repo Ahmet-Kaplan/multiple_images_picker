@@ -25,8 +25,9 @@ class AssetThumbImageProvider extends ImageProvider<AssetThumbImageProvider> {
     this.scale = 1.0,
   });
 
+
   @override
-  ImageStreamCompleter load(AssetThumbImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(AssetThumbImageProvider key) {
     return new MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
