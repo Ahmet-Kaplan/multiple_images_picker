@@ -1,3 +1,5 @@
+// ignore_for_file: doc_directive_unknown
+
 class Metadata {
   /// ExIF meta data
   final ExifMetadata exif;

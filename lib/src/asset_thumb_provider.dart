@@ -25,8 +25,21 @@ class AssetThumbImageProvider extends ImageProvider<AssetThumbImageProvider> {
     this.scale = 1.0,
   });
 
-
   @override
+  ImageStreamCompleter loadImage(AssetThumbImageProvider key, ImageDecoderCallback decode) {
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>(
+          'AssetThumbImageProvider: $this \n Image key: $key',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        );
+      },
+    );
+  }
+
   ImageStreamCompleter load(AssetThumbImageProvider key) {
     return new MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
@@ -56,6 +69,7 @@ class AssetThumbImageProvider extends ImageProvider<AssetThumbImageProvider> {
   }
 
   @override
+  // ignore: non_nullable_equals_parameter
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final AssetThumbImageProvider typedOther = other;
@@ -63,7 +77,7 @@ class AssetThumbImageProvider extends ImageProvider<AssetThumbImageProvider> {
   }
 
   @override
-  int get hashCode => hashValues(asset.identifier, scale, width, height, quality);
+  int get hashCode => Object.hash(asset.identifier, scale, width, height, quality);
 
   @override
   String toString() => '$runtimeType(${asset.identifier}, scale: $scale, '
